@@ -62,13 +62,9 @@
         },
         {
             "type": "docx",
-            "title": "Load text from page",
-            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nconst doc = await documentViewer.getDocument();\nconst officeEditor = doc.getOfficeEditor();\nconst textList = await doc.getTextList();"
-        },
-        {
-            "type": "docx",
             "title": "Load text from coordinates",
             "snippet": "const getTextFromCoordinatesOfCurrentPage = async (x = 400, y = 400) => {\n    const { documentViewer } = WebViewer.getInstance().Core; \n    const doc = documentViewer.getDocument();\n    if (doc) {\n        const currentPageNum = documentViewer.getCurrentPage();\n        const info = doc.getPageInfo(currentPageNum);\n        const rect = new Core.Math.Rect(x, y, info.width, info.height);\n        const text = await doc.getTextByPageAndRect(currentPageNum, rect);\n        return text;\n    } else {\n        return \"No document\";\n    }\n};\nawait getTextFromCoordinatesOfCurrentPage(400, 400)"
         }
     ]   
 }
+
