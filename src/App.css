@@ -1,0 +1,10 @@
+#tableOfContents {
+  display: flex;
+  width: 100vw;
+  justify-content: center;
+  padding: 2vh 2vw;
+}
+
+.entry {
+  margin: 0.5rem 0.5rem;
+}

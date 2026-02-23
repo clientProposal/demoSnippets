@@ -1,0 +1,74 @@
+{
+    "blocks" : [
+        {
+            "title": "Get back blob from docx",
+            "snippet": "const instance = WebViewer.getInstance(); \n await instance.Core.documentViewer.getDocument().getFileData({ downloadType: 'office' });",
+            "type": "docx"
+        },
+        {
+            "title": "Download docx",
+            "snippet": "const instance = WebViewer.getInstance();\nconst documentViewer = instance.Core.documentViewer;\nasync function downloadDocx() {\n  const doc = documentViewer.getDocument();\n  const data = await doc.getFileData({ \n    downloadType: 'office'\n  });\n  const arr = new Uint8Array(data);\n  const blob = new Blob([arr], { \n    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' \n  });\n  const url = window.URL.createObjectURL(blob);\n  const a = document.createElement('a');\n  a.href = url;\n  a.download = 'edited-document.docx';\n  document.body.appendChild(a);\n  a.click();\n  document.body.removeChild(a);\n  window.URL.revokeObjectURL(url);\n}\nawait downloadDocx();\n",
+            "type": "docx"
+        },
+        {
+            "type": "spreadsheet",
+            "title": "Get back invoice from Spreadsheet Editor",
+            "snippet": "const instance = WebViewer.getInstance(document.getElementById(\"spreadsheet-editor-iframe\")); \n const { documentViewer } = instance.Core; \n const spreadsheetEditorDocument = documentViewer.getDocument().getSpreadsheetEditorDocument(); \n const workbook = spreadsheetEditorDocument.getWorkbook(); \n const sheet = workbook.getSheet(\"Invoice\");"
+        },
+        {
+            "type": "spreadsheet",
+            "title": "Spreadsheet editor, make a new sheet",
+            "snippet": "const instance = WebViewer.getInstance(document.getElementById(\"spreadsheet-editor-iframe\"));\nconst { documentViewer } = instance.Core;\nconst spreadsheetEditorDocument = documentViewer.getDocument().getSpreadsheetEditorDocument();\nconst workbook = spreadsheetEditorDocument.getWorkbook();\nworkbook.createSheet('Apryse Technical Demo');"
+        },
+        {
+            "type": "spreadsheet",
+            "title": "Get back info on Spreadsheet editor sheet",
+            "snippet": "const instance = WebViewer.getInstance(document.getElementById(\"spreadsheet-editor-iframe\"));\n\nconst { documentViewer } = instance.Core;\n\nconst spreadsheetEditorDocument = documentViewer.getDocument().getSpreadsheetEditorDocument();\n\nconst workbook = spreadsheetEditorDocument.getWorkbook();\nconst { columnsCount, defaultColumnWidth, defaultRowHeight, rowsCount } = workbook.getSheet('Invoice');\n`columnsCount: ${columnsCount}, defaultColumnWidth: ${defaultColumnWidth}, defaultRowHeight: ${defaultRowHeight}, rowsCount: ${rowsCount}`"
+        },
+        {
+            "type": "spreadsheet",
+            "title": "Insert formula into Spreadsheet Editor Sheet",
+            "snippet": "const instance = WebViewer.getInstance(document.getElementById(\"spreadsheet-editor-iframe\"));\n\nconst { documentViewer } = instance.Core;\n\nconst spreadsheetEditorDocument = documentViewer.getDocument().getSpreadsheetEditorDocument();\n\nconst workbook = spreadsheetEditorDocument.getWorkbook();\n\nconst sheet = workbook.getSheet('Invoice');\n\nsheet.getRowAt(0).getCellAt(3).setFormula(\"=SUM(G17:H17)\");"
+        },
+        {
+            "type": "flattenForm",
+            "title": "Event Listener for Form Field Change",
+            "snippet": "const wv = WebViewer.getInstance();\nconst { Core: { annotationManager, documentViewer } } = wv;\n\nconst doc = documentViewer.getDocument();\n\nconst fields = annotationManager.getFieldManager().getFields();\n\nannotationManager.addEventListener( 'fieldChanged', async (field, value) => {\n    console.log(\"field: \" + field +\", value: \" + value)\n})"
+        },
+        {
+            "type": "ui",
+            "title": "Hide element - Left Panel Button",
+            "snippet": "const instance = WebViewer.getInstance();\ninstance.UI.disableElements(['leftPanelButton']);"
+        },
+        {
+            "type": "docx",
+            "title": "Event listener for tracked changes",
+            "snippet": "const instance = WebViewer.getInstance(); \nconst { Core: { documentViewer, annotationManager } } = instance;\nconst doc = documentViewer.getDocument();\ndoc.addEventListener('trackedChangesUpdated', async change => {\n    console.log(\"change\")\n})"
+        },
+        {
+            "type": "ui",
+            "title": "Open the notes panel",
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nUI.openElements([\"notesPanel\"]);"
+        },
+        {
+            "type": "annotations",
+            "title": "Export Annotations",
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nawait annotationManager.exportAnnotations();"
+        },
+        {
+            "type": "annotations",
+            "title": "Programmatically create caret annotation",
+            "snippet": "const createCaretAnnotation = (PageNumber = 1, X = 400, Y = 400, Width = 50, Height = 50) => {\n    return new Annotations.CaretAnnotation({\n    PageNumber,\n    X,\n    Y,\n    Width,\n    Height\n})\n}\n  const includeAnnotation = (annotation, annotationManager) => {\n                annotationManager.addAnnotation(annotation);\n                annotationManager.redrawAnnotation(annotation);\n                annotationManager.selectAnnotation(annotation); \n}\n\nconst { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();"
+        },
+        {
+            "type": "docx",
+            "title": "Load text from page",
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nconst doc = await documentViewer.getDocument();\nconst officeEditor = doc.getOfficeEditor();\nconst textList = await doc.getTextList();"
+        },
+        {
+            "type": "docx",
+            "title": "Load text from coordinates",
+            "snippet": "const getTextFromCoordinatesOfCurrentPage = async (x = 400, y = 400) => {\n    const { documentViewer } = WebViewer.getInstance().Core; \n    const doc = documentViewer.getDocument();\n    if (doc) {\n        const currentPageNum = documentViewer.getCurrentPage();\n        const info = doc.getPageInfo(currentPageNum);\n        const rect = new Core.Math.Rect(x, y, info.width, info.height);\n        const text = await doc.getTextByPageAndRect(currentPageNum, rect);\n        return text;\n    } else {\n        return \"No document\";\n    }\n};\nawait getTextFromCoordinatesOfCurrentPage(400, 400)"
+        }
+    ]   
+}
