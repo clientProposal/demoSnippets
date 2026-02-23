@@ -1,6 +1,0 @@
-// ,
-//         {
-//             "type": "docx",
-//             "title": "Load text from page",
-//             "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nconst doc = await documentViewer.getDocument();\nconst officeEditor = doc.getOfficeEditor();\nconst textList = await doc.loadPageText(1);\ntext"
-//         },
