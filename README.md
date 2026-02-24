@@ -1,6 +1,7 @@
 # To set up:
 
 npm i 
+
 npm run dev
 
 ## Objective:
