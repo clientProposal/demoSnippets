@@ -51,12 +51,12 @@
             "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nUI.openElements([\"notesPanel\"]);"
         },
         {
-            "type": "annotations",
+            "type": "pdf",
             "title": "Export Annotations",
             "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nawait annotationManager.exportAnnotations();"
         },
         {
-            "type": "annotations",
+            "type": "pdf",
             "title": "Create caret annotation",
             "snippet": "const createCaretAnnotation = (PageNumber = 1, X = 400, Y = 400, Width = 50, Height = 50) => {\n    return new Annotations.CaretAnnotation({\n    PageNumber,\n    X,\n    Y,\n    Width,\n    Height\n})\n}\n  const includeAnnotation = (annotation, annotationManager) => {\n                annotationManager.addAnnotation(annotation);\n                annotationManager.redrawAnnotation(annotation);\n                annotationManager.selectAnnotation(annotation); \n}\n\nconst { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();"
         },
@@ -74,6 +74,11 @@
             "type": "docx",
             "title": "IME Keyboard",
             "snippet": "WebViewer.getInstance().Core.documentViewer.enableCompositionInput()\n// Make sure that input is set to Japanese Romaji and\n// that the Google Japanese IME is installed, then try \"ka\"\n// https://www.google.co.jp/ime/"
+        },
+        {
+            "type": "pdf",
+            "title": "Text Extraction",
+            "snippet": "const instance = WebViewer.getInstance(); \n\nconst { Core: { documentViewer, annotationManager, PDFNet } } = instance;\nasync function extractFirstThreeLines() {\n  try {\n    await PDFNet.initialize();\n    \n    const doc = documentViewer.getDocument();\n    \n    if (!doc) {\n      console.log('No document loaded');\n      return;\n    }\n    \n    const pdfDoc = await doc.getPDFDoc();\n    \n    if (!pdfDoc) {\n      console.log('Document is not a PDF');\n      return;\n    }\n    \n    const txt = await PDFNet.runWithCleanup(async () => {\n      const textExtractor = await PDFNet.TextExtractor.create();\n      \n      const firstPage = await pdfDoc.getPage(1);\n      await textExtractor.begin(firstPage, null);\n      \n      const fullText = await textExtractor.getAsText();\n      \n      const lines = fullText.split('\n');\n      const firstThreeLines = lines.slice(0, 3).join('\n');\n      \n      return firstThreeLines;\n    });\n    \n    return txt;\n    \n  } catch (error) {\n    console.error('Error extracting text:', error);\n  }\n}\n\nextractFirstThreeLines();"
         }
     ]
 }
