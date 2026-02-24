@@ -32,7 +32,7 @@
         },
         {
             "type": "flattenForm",
-            "title": "Event Listener for Form Field Change, get back key-value pairs",
+            "title": "E.L. for Field Change, get KV pair",
             "snippet": "const wv = WebViewer.getInstance();\nconst { Core: { annotationManager, documentViewer } } = wv;\n\nconst doc = documentViewer.getDocument();\n\nconst fields = annotationManager.getFieldManager().getFields();\n\nannotationManager.addEventListener( 'fieldChanged', async (field, value) => {\n    console.log(\"field: \" + field +\", value: \" + value)\n})"
         },
         {
@@ -69,6 +69,11 @@
             "type": "docx",
             "title": "Load text from page",
             "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\nconst doc = await documentViewer.getDocument();\nconst officeEditor = doc.getOfficeEditor();\nconst textList = await doc.loadPageText(1);\ntextList"
+        },
+        {
+            "type": "docx",
+            "title": "IME Keyboard",
+            "snippet": "WebViewer.getInstance().Core.documentViewer.enableCompositionInput()\n// Make sure that input is set to Japanese Romaji and\n// that the Google Japanese IME is installed, then try \"ka\"\n// https://www.google.co.jp/ime/"
         }
     ]
 }
