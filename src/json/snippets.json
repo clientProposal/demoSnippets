@@ -118,10 +118,6 @@
             "type": "ui",
             "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Single);"
         }, {
-            "title": "Single, Flashing Scroll",
-            "type": "ui",
-            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Single);"
-        }, {
             "title": "Single, Continuous Scroll",
             "type": "ui",
             "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Continuous);"
