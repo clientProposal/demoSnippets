@@ -79,6 +79,60 @@
             "type": "pdf",
             "title": "Text Extraction",
             "snippet": "const instance = WebViewer.getInstance(); \n\nconst { Core: { documentViewer, annotationManager, PDFNet } } = instance;\nasync function extractFirstThreeLines() {\n  try {\n    await PDFNet.initialize();\n    \n    const doc = documentViewer.getDocument();\n    \n    if (!doc) {\n      console.log('No document loaded');\n      return;\n    }\n    \n    const pdfDoc = await doc.getPDFDoc();\n    \n    if (!pdfDoc) {\n      console.log('Document is not a PDF');\n      return;\n    }\n    \n    const txt = await PDFNet.runWithCleanup(async () => {\n      const textExtractor = await PDFNet.TextExtractor.create();\n      \n      const firstPage = await pdfDoc.getPage(1);\n      await textExtractor.begin(firstPage, null);\n      \n      const fullText = await textExtractor.getAsText();\n      \n      const lines = fullText.split('\n');\n      const firstThreeLines = lines.slice(0, 3).join('\n');\n      \n      return firstThreeLines;\n    });\n    \n    return txt;\n    \n  } catch (error) {\n    console.error('Error extracting text:', error);\n  }\n}\n\nextractFirstThreeLines();"
+        }, {
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\n\nconst createTextHighlightAnnotation = (PageNumber = 1, X = 400, Y = 400, Width = 50, Height = 50, R = 255, G = 255, B = 0) => {\n    return new Annotations.TextHighlightAnnotation({\n        PageNumber,\n        X,\n        Y,\n        Width,\n        Height,\n        StrokeColor: new Annotations.Color(R, G, B)\n    })\n\n}\n\nconst includeAnnotation = (annotation, annotationManager) => {\n    annotationManager.addAnnotation(annotation);\n    annotationManager.redrawAnnotation(annotation);\n    annotationManager.selectAnnotation(annotation);\n}\n\nconst findText = (searchTerm, pg = 1) => {\n  return new Promise((resolve) => {\n    const searchListener = (searchPattern, options, results) => {\n      UI.removeSearchListener(searchListener);\n      \n      const page1Results = results.filter(result => result.page_num === pg);\n      \n      const textRects = page1Results.map(result => {\n        const q = result.quads[0];\n        \n        const topY = q.y1;\n        const bottomY = q.pm || q.va;\n        \n        return {\n          x: q.x1,                   \n          y: topY,                   \n          width: q.x2 - q.x1,         \n          height: bottomY - topY    \n        };\n      });\n      \n      resolve(textRects);\n    };\n    \n    UI.addSearchListener(searchListener);\n    UI.searchTextFull(searchTerm, { \n      pageNumber: pg,\n      ambientString: true \n    });\n  });\n};\n\nconst texts = await findText(\"administration\");\n\nconst {x: X, y: Y, width: Width, height: Height} = texts[0];\n\nincludeAnnotation(createTextHighlightAnnotation(1,X,Y,Width,Height),annotationManager)\n",
+            "title": "Create an annotation on first instance of a text found",
+            "type": "pdf"
+        },
+        {
+            "snippet": "(function () {\n  function ensureOverlayContainer() {\n    const viewerEl = document.getElementById('viewer') || document.querySelector('#viewer');\n    if (!viewerEl) {\n      console.error('Viewer element not found (expected #viewer).');\n      return null;\n    }\n\n    let overlay = document.getElementById('wv-left-indicator-overlay');\n    if (!overlay) {\n      overlay = document.createElement('div');\n      overlay.id = 'wv-left-indicator-overlay';\n      Object.assign(overlay.style, {\n        position: 'absolute',\n        pointerEvents: 'none',\n        zIndex: 9999\n      });\n      document.body.appendChild(overlay);\n\n      syncOverlayToViewer();\n      window.addEventListener('resize', syncOverlayToViewer);\n      window.addEventListener('scroll', syncOverlayToViewer);\n    }\n    return overlay;\n  }\n\n  function syncOverlayToViewer() {\n    const viewerEl = document.getElementById('viewer') || document.querySelector('#viewer');\n    const overlay = document.getElementById('wv-left-indicator-overlay');\n    if (!viewerEl || !overlay) return;\n\n    const rect = viewerEl.getBoundingClientRect();\n    overlay.style.top = rect.top + window.scrollY + 'px';\n    overlay.style.left = rect.left + window.scrollX + 'px';\n    overlay.style.width = rect.width + 'px';\n    overlay.style.height = rect.height + 'px';\n  }\n\n  window.addLeftOverlayIndicator = function (yOffset, text) {\n    const overlay = ensureOverlayContainer();\n    if (!overlay) return;\n\n    const WIDTH = 160;     \n\n    const wrapper = document.createElement('div');\n    Object.assign(wrapper.style, {\n      position: 'absolute',\n      left: '0px',\n      top: `${yOffset}px`, \n      pointerEvents: 'none',\n      width: `${WIDTH}px`,\n      display: 'flex',\n      flexDirection: 'column',\n      alignItems: 'flex-start'\n    });\n\n    const ARROW_HEIGHT = 18;\n    const ARROW_WIDTH = 26;\n\n    const arrow = document.createElement('div');\n    Object.assign(arrow.style, {\n      width: '0',\n      height: '0',\n      borderTop: `${ARROW_HEIGHT / 2}px solid transparent`,\n      borderBottom: `${ARROW_HEIGHT / 2}px solid transparent`,\n      borderLeft: `${ARROW_WIDTH}px solid #001f3f`,\n      marginBottom: '2px'  \n    });\n\n    const PADDING_V = 4;  \n    const PADDING_H = 8;\n\n    const box = document.createElement('div');\n    box.textContent = text;\n    Object.assign(box.style, {\n      backgroundColor: 'white',\n      color: '#001f3f',\n      fontFamily: 'sans-serif',\n      fontSize: '12px',\n      padding: `${PADDING_V}px ${PADDING_H}px`,\n      border: '1px solid #001f3f',\n      borderRadius: '0 4px 4px 0',\n      boxSizing: 'border-box',\n      maxWidth: `${WIDTH}px`,\n      whiteSpace: 'normal',\n      wordBreak: 'break-word',\n      pointerEvents: 'none'\n    });\n\n    wrapper.appendChild(arrow);\n    wrapper.appendChild(box);\n    overlay.appendChild(wrapper);\n\n    return wrapper;\n  };\n\n  window.syncLeftOverlayIndicators = syncOverlayToViewer;\n})();\naddLeftOverlayIndicator(440, 'This custom field indicator can grow to whatever size you like');",
+            "title": "Create a custom field indicator that grows",
+            "type": "pdf"
+        },
+        {
+            "snippet": "const instance = WebViewer.getInstance(); \nconst doc = await instance.Core.documentViewer.getDocument().getPDFDoc();const sdfDoc = await doc.getSDFDoc();\nconst isLinearized = await sdfDoc.isLinearized();\nisLinearized",
+            "title": "Check for Linearisation",
+            "type": "pdf"
+        }, {
+            "snippet": "const instance = WebViewer.getInstance();\nconst { documentViewer } = instance.Core;\n\ndocumentViewer.addEventListener('pageNumberUpdated', () => {\n  const current = documentViewer.getCurrentPage();\n  console.log('User scrolled to page', current);\n})",
+            "title": "Listen for scrolling",
+            "type": "ui" 
+        }, {
+            "title": "Double-page, Starts as One, Flashing Scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.FacingCover);"
+        }, {
+            "title": "Double-page, Starts as Two, Flashing Scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Facing);"
+        }, {
+            "title": "Double-page, Starts as Two, Continuous scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.FacingContinuous);"
+        }, {
+            "title": "Double-page, Starts as One, Continuous scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.FacingCoverContinuous);"
+        }, {
+            "title": "Single, Flashing Scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Single);"
+        }, {
+            "title": "Single, Flashing Scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Single);"
+        }, {
+            "title": "Single, Continuous Scroll",
+            "type": "ui",
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\nUI.setLayoutMode(UI.LayoutMode.Continuous);"
+        }, {
+            "snippet": "const instance = WebViewer.getInstance();\nconst { documentViewer } = instance.Core;\n\ndocumentViewer.setCurrentPage(3);",
+            "type": "ui",
+            "title": "Jump to a page"
+        }, {
+            "snippet": "// ************************************\n// part 1:\n// ************************************\n\n// https://apryse-my.sharepoint.com/:f:/p/josephine_geoghegan/IgDsG1BJ64WBTp7Gl0uT4hdwASJM4Ccr-Z3rH-SjOxsxuQM?e=o3LYlP\n\n\nconst instance = WebViewer.getInstance();\nconst { UI } = instance; \n\ninstance.UI.enableMultiViewerSync(1);\n// ************************************\n// part 2:\n// ************************************\ninstance.UI.setMultiViewerSyncScrollingMode('SKIP_UNMATCHED'); \n\n// A -> full doc, B -> doc with pages missing. \n\n// If I have SKIP_UNMATCHED on and scroll on full doc A, B does not begin to move until we reach page 2, with the black cat \n\n// ************************************\n// part 3:\n// ************************************\n\ninstance.UI.setMultiViewerSyncScrollingMode('SYNC'); \n\n\n// B moves right away and attempts to match A",
+            "type": "ui",
+            "title": "Scrolling in compare mode - jump missing pages or not"
         }
     ]
 }
