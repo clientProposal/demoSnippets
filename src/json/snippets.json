@@ -129,6 +129,10 @@
             "snippet": "// ************************************\n// part 1:\n// ************************************\n\n// https://apryse-my.sharepoint.com/:f:/p/josephine_geoghegan/IgDsG1BJ64WBTp7Gl0uT4hdwASJM4Ccr-Z3rH-SjOxsxuQM?e=o3LYlP\n\n\nconst instance = WebViewer.getInstance();\nconst { UI } = instance; \n\ninstance.UI.enableMultiViewerSync(1);\n// ************************************\n// part 2:\n// ************************************\ninstance.UI.setMultiViewerSyncScrollingMode('SKIP_UNMATCHED'); \n\n// A -> full doc, B -> doc with pages missing. \n\n// If I have SKIP_UNMATCHED on and scroll on full doc A, B does not begin to move until we reach page 2, with the black cat \n\n// ************************************\n// part 3:\n// ************************************\n\ninstance.UI.setMultiViewerSyncScrollingMode('SYNC'); \n\n\n// B moves right away and attempts to match A",
             "type": "ui",
             "title": "Scrolling in compare mode - jump missing pages or not"
+        }, {
+            "snippet": "const { UI } = WebViewer.getInstance();\n\nUI.enableElements(['readerPageTransitionButton']);",
+            "type": "ui",
+            "title": "Make Reader option appear in view controls"
         }
     ]
 }
