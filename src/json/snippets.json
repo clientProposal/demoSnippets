@@ -141,6 +141,11 @@
             "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\n\ninstance.UI.enableFadePageNavigationComponent()",
             "type": "ui",
             "title": "Have the page navigation fade in and out"
+        },
+        {
+            "snippet": "WebViewer.getInstance().UI.exportModularComponents()",
+            "type": "ui",
+            "title": "Get back JSON of UI to re-use again"
         }
     ]
 }
