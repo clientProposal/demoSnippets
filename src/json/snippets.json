@@ -133,6 +133,10 @@
             "snippet": "const { UI } = WebViewer.getInstance();\n\nUI.enableElements(['readerPageTransitionButton']);",
             "type": "ui",
             "title": "Make Reader option appear in view controls"
+        }, {
+            "snippet": "const { documentViewer } = WebViewer.getInstance().Core;\nconst setZoomPercent = percent => {\n    const zoom = percent / 100;\n    documentViewer.zoomTo(zoom);\n};\nsetZoomPercent(150)",
+            "type": "ui",
+            "title": "Zoom to a certain percentage"
         }
     ]
 }
