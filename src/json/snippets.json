@@ -137,6 +137,10 @@
             "snippet": "const { documentViewer } = WebViewer.getInstance().Core;\nconst setZoomPercent = percent => {\n    const zoom = percent / 100;\n    documentViewer.zoomTo(zoom);\n};\nsetZoomPercent(150)",
             "type": "ui",
             "title": "Zoom to a certain percentage"
+        }, {
+            "snippet": "const instance = WebViewer.getInstance();\nconst { UI } = instance;\n\ninstance.UI.enableFadePageNavigationComponent()",
+            "type": "ui",
+            "title": "Have the page navigation fade in and out"
         }
     ]
 }
