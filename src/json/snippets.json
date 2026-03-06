@@ -146,6 +146,11 @@
             "snippet": "WebViewer.getInstance().UI.exportModularComponents()",
             "type": "ui",
             "title": "Get back JSON of UI to re-use again"
+        },
+        {
+            "snippet": "const childCount = document.querySelector(\"#tabs-2--tabpanel-0 > div > div.css-0 > div:nth-child(6) > div.css-qjsj4r > div > span > code\").childElementCount;\n\nlet json = \"\";\nfor (let i = 1; i <= childCount; i++) {\n    json = json + document.querySelector(\"#tabs-2--tabpanel-0 > div > div.css-0 > div:nth-child(6) > div.css-qjsj4r > div > span > code > span:nth-child(\" + i + \")\").textContent\n}",
+            "type": "ui",
+            "title": "Get back JSON from DSE demo"
         }
     ]
 }
