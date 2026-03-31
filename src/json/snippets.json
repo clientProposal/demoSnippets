@@ -31,8 +31,8 @@
             "snippet": "const instance = WebViewer.getInstance(document.getElementById(\"spreadsheet-editor-iframe\"));\n\nconst { documentViewer } = instance.Core;\n\nconst spreadsheetEditorDocument = documentViewer.getDocument().getSpreadsheetEditorDocument();\n\nconst workbook = spreadsheetEditorDocument.getWorkbook();\n\nconst sheet = workbook.getSheet('Invoice');\n\nsheet.getRowAt(0).getCellAt(3).setFormula(\"=SUM(G17:H17)\");"
         },
         {
-            "type": "flattenForm",
-            "title": "E.L. for Field Change, get KV pair",
+            "type": "eventListeners",
+            "title": "Listen for Field Change, get KV pair",
             "snippet": "const wv = WebViewer.getInstance();\nconst { Core: { annotationManager, documentViewer } } = wv;\n\nconst doc = documentViewer.getDocument();\n\nconst fields = annotationManager.getFieldManager().getFields();\n\nannotationManager.addEventListener( 'fieldChanged', async (field, value) => {\n    console.log(\"field: \" + field +\", value: \" + value)\n})"
         },
         {
@@ -43,7 +43,7 @@
         {
             "type": "docx",
             "title": "Event listener for tracked changes",
-            "snippet": "const instance = WebViewer.getInstance(); \nconst { Core: { documentViewer, annotationManager } } = instance;\nconst doc = documentViewer.getDocument();\ndoc.addEventListener('trackedChangesUpdated', async change => {\n    console.log(\"change\")\n})"
+            "snippet": "const instance = WebViewer.getInstance();\n \nconst { Core: { documentViewer, annotationManager } } = instance;\n \nconst doc = documentViewer.getDocument();\n \nconst officeEditor = doc.getOfficeEditor();\n \nawait officeEditor.setEditMode('reviewing');\n \ndoc.addEventListener('trackedChangesUpdated', async change => {\n \n   console.log('change: ', await officeEditor.getTrackedChanges());\n \n})\n "
         },
         {
             "type": "ui",
@@ -80,7 +80,7 @@
             "title": "Text Extraction",
             "snippet": "const instance = WebViewer.getInstance(); \n\nconst { Core: { documentViewer, annotationManager, PDFNet } } = instance;\nasync function extractFirstThreeLines() {\n  try {\n    await PDFNet.initialize();\n    \n    const doc = documentViewer.getDocument();\n    \n    if (!doc) {\n      console.log('No document loaded');\n      return;\n    }\n    \n    const pdfDoc = await doc.getPDFDoc();\n    \n    if (!pdfDoc) {\n      console.log('Document is not a PDF');\n      return;\n    }\n    \n    const txt = await PDFNet.runWithCleanup(async () => {\n      const textExtractor = await PDFNet.TextExtractor.create();\n      \n      const firstPage = await pdfDoc.getPage(1);\n      await textExtractor.begin(firstPage, null);\n      \n      const fullText = await textExtractor.getAsText();\n      \n      const lines = fullText.split('\n');\n      const firstThreeLines = lines.slice(0, 3).join('\n');\n      \n      return firstThreeLines;\n    });\n    \n    return txt;\n    \n  } catch (error) {\n    console.error('Error extracting text:', error);\n  }\n}\n\nextractFirstThreeLines();"
         }, {
-            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\n\nconst createTextHighlightAnnotation = (PageNumber = 1, X = 400, Y = 400, Width = 50, Height = 50, R = 255, G = 255, B = 0) => {\n    return new Annotations.TextHighlightAnnotation({\n        PageNumber,\n        X,\n        Y,\n        Width,\n        Height,\n        StrokeColor: new Annotations.Color(R, G, B)\n    })\n\n}\n\nconst includeAnnotation = (annotation, annotationManager) => {\n    annotationManager.addAnnotation(annotation);\n    annotationManager.redrawAnnotation(annotation);\n    annotationManager.selectAnnotation(annotation);\n}\n\nconst findText = (searchTerm, pg = 1) => {\n  return new Promise((resolve) => {\n    const searchListener = (searchPattern, options, results) => {\n      UI.removeSearchListener(searchListener);\n      \n      const page1Results = results.filter(result => result.page_num === pg);\n      \n      const textRects = page1Results.map(result => {\n        const q = result.quads[0];\n        \n        const topY = q.y1;\n        const bottomY = q.pm || q.va;\n        \n        return {\n          x: q.x1,                   \n          y: topY,                   \n          width: q.x2 - q.x1,         \n          height: bottomY - topY    \n        };\n      });\n      \n      resolve(textRects);\n    };\n    \n    UI.addSearchListener(searchListener);\n    UI.searchTextFull(searchTerm, { \n      pageNumber: pg,\n      ambientString: true \n    });\n  });\n};\n\nconst texts = await findText(\"administration\");\n\nconst {x: X, y: Y, width: Width, height: Height} = texts[0];\n\nincludeAnnotation(createTextHighlightAnnotation(1,X,Y,Width,Height),annotationManager)\n",
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\n\nconst includeAnnotation = (annotation, annotationManager) => {\n    annotationManager.addAnnotation(annotation);\n    annotationManager.redrawAnnotation(annotation);\n    annotationManager.selectAnnotation(annotation);\n}\n\nconst findText = (searchTerm, pg = 1) => {\n  return new Promise((resolve) => {\n    const searchListener = (searchPattern, options, results) => {\n      UI.removeSearchListener(searchListener);\n      \n      const page1Results = results.filter(result => result.page_num === pg);\n      \n      const textRects = page1Results.map(result => {\n        const q = result.quads[0];\n        \n        const topY = q.y1;\n        const bottomY = q.pm || q.va;\n        \n        return {\n          x: q.x1,                   \n          y: topY,                   \n          width: q.x2 - q.x1,         \n          height: bottomY - topY    \n        };\n      });\n      \n      resolve(textRects);\n    };\n    \n    UI.addSearchListener(searchListener);\n    UI.searchTextFull(searchTerm, { \n      pageNumber: pg,\n      ambientString: true \n    });\n  });\n};\n\nconst createTextHighlightAnnotation = (\n  PageNumber = 1,\n  X = 400,\n  Y = 400,\n  Width = 50,\n  Height = 50,\n  R = 255,\n  G = 255,\n  B = 0\n) => {\n  const annot = new Annotations.TextHighlightAnnotation({\n    PageNumber,\n    X,\n    Y,\n    Width,\n    Height,\n    Color: new Annotations.Color(R, G, B)\n  });\n  annot.Quads = [{\n    x1: X,\n    y1: Y,             \n    x2: X + Width,\n    y2: Y,             \n    x3: X + Width,\n    y3: Y + Height,    \n    x4: X,\n    y4: Y + Height    \n  }];\n  return annot;\n};\n\nconst text = await findText(\"before you dive\", 2);\n\nconst {x: X, y: Y, width: Width, height: Height} = text[0];\n\nincludeAnnotation(createTextHighlightAnnotation(2,X,Y,Width,Height),annotationManager)",
             "title": "Create an annotation on first instance of a text found",
             "type": "pdf"
         },
@@ -151,6 +151,23 @@
             "snippet": "const childCount = document.querySelector(\"#tabs-2--tabpanel-0 > div > div.css-0 > div:nth-child(6) > div.css-qjsj4r > div > span > code\").childElementCount;\n\nlet json = \"\";\nfor (let i = 1; i <= childCount; i++) {\n    json = json + document.querySelector(\"#tabs-2--tabpanel-0 > div > div.css-0 > div:nth-child(6) > div.css-qjsj4r > div > span > code > span:nth-child(\" + i + \")\").textContent\n}",
             "type": "ui",
             "title": "Get back JSON from DSE demo"
+        }, {
+            "snippet": "annotationManager.addEventListener('annotationChanged', (annotations, action, { \n imported, fromHistory } = {}) => {\n\tconsole.log(`The annotation(s): have been updated by the action: ${action} and this was ${imported ? `an import from another file` : `a product of an action in the interface`}`);\n\tconsole.log(annotations.map(a => `annotation of type: ${a.getType()}`)); \n});",
+            "type": "eventListeners",
+            "title": "Listen for annotation changes"
+        }, {
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\n\ndocumentViewer.addEventListener('textSelected', async () => {\n  const selection = documentViewer.getSelectedText();\n\n  console.log('Selected text:', selection);\n});",
+            "type": "eventListeners",
+            "title": "Listen for text selection"
+        }, {
+            "snippet": "const instance = WebViewer.getInstance();\nconst { annotationManager, Annotations } = instance.Core;\nconst { WidgetFlags } = Annotations;\nconst flags = new WidgetFlags();\nconst field = new Annotations.Forms.Field('some signature field name', { \n      type: 'Sig', \n      flags,\n    });\n\n\n    const widgetAnnot = new Annotations.SignatureWidgetAnnotation(field, {\n      appearance: '_DEFAULT',\n      appearances: {\n        _DEFAULT: {\n          Normal: {\n            offset: {\n              x: 100,\n              y: 100,\n            },\n          },\n        },\n      },\n    });\n    widgetAnnot.PageNumber = 1;\n    widgetAnnot.X = 100;\n    widgetAnnot.Y = 100;\n    widgetAnnot.Width = 200;\n    widgetAnnot.Height = 100;\n    widgetAnnot.backgroundColor = new Annotations.Color(255, 255, 0); \n    widgetAnnot.StrokeColor = new Annotations.Color(255, 0, 0);\n    widgetAnnot.StrokeThickness = 3;\n    await annotationManager.getFieldManager().addField(field);\n    await annotationManager.addAnnotation(widgetAnnot);\n    await annotationManager.drawAnnotationsFromList([widgetAnnot]);",
+            "type": "pdf",
+            "title": "Programmatically create signature widget with coloured border, background, etcetera"
+        },
+        {
+            "snippet": "const { Core: { documentViewer, annotationManager, PDFNet, Annotations }, UI } = WebViewer.getInstance();\n annotationManager.setCurrentUser('Josephine');",
+            "type": "pdf",
+            "title": "Set user on viewer/annotations"
         }
     ]
 }

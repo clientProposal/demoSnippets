@@ -52,9 +52,9 @@ export default function TableOfContents({ blocks }) {
                 }
             </div>
             <div>
-                <h3 style={{textAlign: "center"}}>Form Flatten</h3>
+                <h3 style={{textAlign: "center"}}>Event Listeners</h3>
                 {
-                    blocks.filter(b => b.type === "flattenForm").map((blk, idx) => {
+                    blocks.filter(b => b.type === "eventListeners").map((blk, idx) => {
                         return (
                             <div className={"entry"} key={idx}>
                                 <a href={`#cblk_${((blk.title).replaceAll(" ", "_")).toLowerCase()}`}>{blk.title}</a><br></br>
